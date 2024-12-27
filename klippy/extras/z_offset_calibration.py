@@ -27,22 +27,25 @@ class ZoffsetCalibration:
         # add reference to the probe for later use
         self.probe = probe
         
-        # check if a probe is installed
-        if True: #config.has_section("probe"):
-            #probe_cfg = config.getsection('probe')
-            self.x_offset = -17
-            self.y_offset = 10
-            # check if a possible valid offset is set for probe
-            if ((self.x_offset == 0) and (self.y_offset == 0)):
-                raise config.error("ZoffsetCalibration: Check the x and y offset from [probe] - it seems both are 0 and the Probe can't be at the same position as the nozzle :-)")
-            
-            probe_pressure = config.getsection('probe_pressure')
-            self.x_offsetp = probe_pressure.getfloat('x_offset', note_valid=False)
-            self.y_offsetp = probe_pressure.getfloat('y_offset', note_valid=False)
+        # check if a probe or eddy is installed
+        if config.has_section("probe"):
+            probe_cfg = config.getsection('probe')
+        elif config.has_section("probe_eddy_current btt_eddy"):
+            probe_cfg = config.getsection('probe_eddy_current btt_eddy')
+        else:
+            raise config.error("ZoffsetCalibration: probe in configured in your system - check your setup.")
 
-        #else:
-        #    raise config.error("ZoffsetCalibration: probe in configured in your system - check your setup.")
-        
+        self.x_offset = probe_cfg.getfloat('x_offset', note_valid=False)
+        self.y_offset = probe_cfg.getfloat('y_offset', note_valid=False)
+        # check if a possible valid offset is set for probe
+        if ((self.x_offset == 0) and (self.y_offset == 0)):
+            raise config.error("ZoffsetCalibration: Check the x and y offset from [probe] - it seems both are 0 and the Probe can't be at the same position as the nozzle :-)")
+
+        probe_pressure = config.getsection('probe_pressure')
+        self.x_offsetp = probe_pressure.getfloat('x_offset', note_valid=False)
+        self.y_offsetp = probe_pressure.getfloat('y_offset', note_valid=False)
+
+
     def read_varibles_cfg_value(self, option):
         _config = configparser.ConfigParser()
         _config.read(self.saved_variables_filename) # grab the saved_variables file..
